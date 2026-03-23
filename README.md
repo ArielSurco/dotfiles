@@ -1,8 +1,33 @@
 # Dotfiles
 
-Personal dotfiles — shell aliases and utilities.
+Personal dotfiles — shell aliases and utilities for development workflows.
 
-## Setup
+## Installation
+
+### Homebrew (recommended)
+
+```zsh
+brew tap ArielSurco/dotfiles https://github.com/ArielSurco/dotfiles
+brew install dotfiles
+```
+
+Then run the interactive setup:
+
+```zsh
+dotfiles-setup
+```
+
+And add this line to your `.zshrc`:
+
+```zsh
+source $(brew --prefix)/opt/dotfiles/aliases/init.sh
+```
+
+### Manual
+
+```zsh
+git clone https://github.com/ArielSurco/dotfiles ~/dotfiles
+```
 
 Add this line to your `.zshrc`:
 
@@ -10,25 +35,35 @@ Add this line to your `.zshrc`:
 source ~/dotfiles/aliases/init.sh
 ```
 
-The barrel file auto-sources every alias script in the directory. Adjust the path if you cloned the repo elsewhere.
+Optionally run the setup wizard to choose which alias groups to enable:
+
+```zsh
+~/dotfiles/bin/dotfiles-setup
+```
+
+## Setup
+
+On first load with no configuration, **all alias groups are enabled** (backwards compatible). Run `dotfiles-setup` to selectively enable/disable groups. The configuration is stored in `~/.dotfiles-data/enabled-groups`.
+
+Core utilities (`utils.sh`) are always loaded regardless of configuration.
 
 ## Aliases
 
-| Alias | Description | Docs |
-|-------|-------------|------|
-| `gp` | Project navigation — register, watch, and jump between project directories | [docs/gp.md](docs/gp.md) |
-| `gsync` | Git branch sync — update configured branches across projects | [docs/gsync.md](docs/gsync.md) |
-| `pf` | Kubernetes port forwarding — forward HAProxy service ports | [docs/pf.md](docs/pf.md) |
-| `pod` | Kubernetes pod connector — interactive context, namespace, and pod selection | [docs/pod.md](docs/pod.md) |
-| `sentry` | Sentry issue search — query events by custom tags across projects | [docs/sentry.md](docs/sentry.md) |
-| `dbs` | Start local Docker database containers | — |
-| `dotalias` | Reload all aliases | — |
+| Alias | Group | Description | Docs |
+|-------|-------|-------------|------|
+| `gp` | navigation | Project navigation — register, watch, and jump between project directories | [docs/gp.md](docs/gp.md) |
+| `gsync` | git | Git branch sync — update configured branches across projects | [docs/gsync.md](docs/gsync.md) |
+| `pf` | kubernetes | Kubernetes port forwarding — forward HAProxy service ports | [docs/pf.md](docs/pf.md) |
+| `pod` | kubernetes | Kubernetes pod connector — interactive context, namespace, and pod selection | [docs/pod.md](docs/pod.md) |
+| `sentry` | sentry | Sentry issue search — query events by custom tags across projects | [docs/sentry.md](docs/sentry.md) |
+| `dbs` | docker | Start local Docker database containers | — |
+| `dotalias` | core | Reload all aliases | — |
 
 ## Dependencies
 
 - **zsh** — Required (aliases use zsh-specific features)
-- **[gum](https://github.com/charmbracelet/gum)** — Optional, for interactive menus. Install: `brew install gum`
-- **[kubectl](https://kubernetes.io/docs/tasks/tools/)** — Required for `pod` alias. Install: `brew install kubectl`
+- **[gum](https://github.com/charmbracelet/gum)** — Recommended, for interactive menus. Install: `brew install gum`
+- **[kubectl](https://kubernetes.io/docs/tasks/tools/)** — Required for `pod` and `pf` aliases. Install: `brew install kubectl`
 - **[jq](https://jqlang.github.io/jq/)** — Required for `sentry` alias. Install: `brew install jq`
 
 ## Running Tests

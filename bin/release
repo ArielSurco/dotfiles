@@ -1,0 +1,57 @@
+#!/usr/bin/env zsh
+# release — Create a new release tag and update the Homebrew formula
+# Usage: bin/release <version>  (e.g. bin/release 1.0.0)
+
+set -e
+
+local version="$1"
+if [[ -z "$version" ]]; then
+  echo "Usage: bin/release <version>" >&2
+  echo "Example: bin/release 1.2.0" >&2
+  return 1 2>/dev/null || exit 1
+fi
+
+local repo_root="${0:A:h}/.."
+local formula="$repo_root/Formula/dotfiles.rb"
+local tag="v${version}"
+local tarball_url="https://github.com/ArielSurco/dotfiles/archive/refs/tags/${tag}.tar.gz"
+
+# Check we're on a clean working tree
+if [[ -n "$(git -C "$repo_root" status --porcelain)" ]]; then
+  echo "Error: working tree is dirty. Commit or stash changes first." >&2
+  return 1 2>/dev/null || exit 1
+fi
+
+# Create and push tag
+echo "Creating tag $tag..."
+git -C "$repo_root" tag "$tag"
+git -C "$repo_root" push origin "$tag"
+
+# Download tarball and compute sha256
+echo "Computing sha256..."
+local sha
+sha=$(curl -sL "$tarball_url" | shasum -a 256 | awk '{print $1}')
+
+if [[ -z "$sha" || "$sha" == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" ]]; then
+  echo "Error: failed to download tarball or empty response" >&2
+  echo "The tag may not be available yet. Wait a moment and run:" >&2
+  echo "  curl -sL $tarball_url | shasum -a 256" >&2
+  return 1 2>/dev/null || exit 1
+fi
+
+# Update formula
+echo "Updating formula..."
+sd "archive/refs/tags/v[^\"]+\.tar\.gz" "archive/refs/tags/${tag}.tar.gz" "$formula"
+sd 'sha256 ".*"' "sha256 \"${sha}\"" "$formula"
+
+# Commit formula update
+git -C "$repo_root" add "$formula"
+git -C "$repo_root" commit -m "chore: bump formula to $tag"
+git -C "$repo_root" push origin master
+
+echo ""
+echo "Released $tag"
+echo "  Tarball: $tarball_url"
+echo "  SHA256:  $sha"
+echo ""
+echo "Users can update with: brew upgrade dotfiles"

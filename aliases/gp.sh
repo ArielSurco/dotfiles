@@ -2,9 +2,6 @@
 # Register projects with gp_set, navigate with gp, tab-complete project names.
 # Registry: ~/.dotfiles-data/gp-projects (key=path, one per line)
 
-export DOTFILES_DATA="$HOME/.dotfiles-data"
-[[ -d "$DOTFILES_DATA" ]] || mkdir -p "$DOTFILES_DATA"
-
 typeset -gA GP_PROJECTS
 typeset -ga GP_WATCHES
 

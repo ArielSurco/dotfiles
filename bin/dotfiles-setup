@@ -1,0 +1,109 @@
+#!/usr/bin/env zsh
+# dotfiles-setup — Interactive alias group configuration
+
+# Resolve paths
+_SETUP_SCRIPT_DIR="${0:A:h}"
+_SETUP_ALIASES_DIR="$_SETUP_SCRIPT_DIR/../aliases"
+
+# Source init.sh to get DOTFILES_DATA and group registry
+# But we need DOTFILES_DATA without loading all aliases
+export DOTFILES_DATA="$HOME/.dotfiles-data"
+[[ -d "$DOTFILES_DATA" ]] || mkdir -p "$DOTFILES_DATA"
+
+# Source init.sh just to get the registry (it will also load aliases but that's ok)
+source "$_SETUP_ALIASES_DIR/init.sh"
+
+configfile="$DOTFILES_DATA/enabled-groups"
+
+# Read current selection if exists
+typeset -A current_enabled
+if [[ -f "$configfile" ]]; then
+  local line
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    [[ -z "$line" || "$line" == \#* ]] && continue
+    current_enabled[$line]=1
+  done < "$configfile"
+fi
+
+echo "Dotfiles Setup"
+echo "=============="
+echo ""
+echo "Select which alias groups to enable:"
+echo "(core aliases are always enabled)"
+echo ""
+
+if command -v gum &>/dev/null; then
+  # Build items for gum choose --no-limit
+  local items=()
+  local preselected=()
+  local gname gval desc
+  for gname in ${(ko)_DOTFILES_GROUPS}; do
+    gval="${_DOTFILES_GROUPS[$gname]}"
+    desc="${gval##*|}"
+    items+=("$gname — $desc")
+    # Pre-select if currently enabled or if no config exists (all enabled by default)
+    if [[ ! -f "$configfile" ]] || [[ -n "${current_enabled[$gname]}" ]]; then
+      preselected+=("$gname — $desc")
+    fi
+  done
+
+  local selected
+  if [[ ${#preselected} -gt 0 ]]; then
+    selected=$(printf '%s\n' "${items[@]}" | gum choose --no-limit --header "Select groups (space to toggle, enter to confirm):" --selected="$(printf '%s,' "${preselected[@]}")")
+  else
+    selected=$(printf '%s\n' "${items[@]}" | gum choose --no-limit --header "Select groups (space to toggle, enter to confirm):")
+  fi
+
+  if [[ -z "$selected" ]]; then
+    echo "No groups selected. Keeping current config."
+    exit 0
+  fi
+
+  # Parse selected — extract group names (before " — ")
+  echo "# Enabled alias groups" > "$configfile"
+  echo "$selected" | while IFS= read -r line; do
+    local gname="${line%% — *}"
+    echo "$gname" >> "$configfile"
+  done
+
+else
+  # Fallback: numbered list with manual input
+  echo "gum not found — using text mode"
+  echo ""
+  local gnames=()
+  local idx=1
+  local gname gval desc
+  for gname in ${(ko)_DOTFILES_GROUPS}; do
+    gval="${_DOTFILES_GROUPS[$gname]}"
+    desc="${gval##*|}"
+    local marker=" "
+    if [[ ! -f "$configfile" ]] || [[ -n "${current_enabled[$gname]}" ]]; then
+      marker="*"
+    fi
+    echo "  [$marker] $idx. $gname — $desc"
+    gnames+=("$gname")
+    (( idx++ ))
+  done
+  echo ""
+  echo "Enter group numbers to enable (comma-separated, e.g. 1,2,3):"
+  echo -n "> "
+  read -r selection
+
+  echo "# Enabled alias groups" > "$configfile"
+  local num
+  for num in ${(s:,:)selection}; do
+    num="${num## }" ; num="${num%% }"
+    if [[ "$num" -ge 1 && "$num" -le ${#gnames} ]]; then
+      echo "${gnames[$num]}" >> "$configfile"
+    fi
+  done
+fi
+
+echo ""
+echo "Enabled groups:"
+while IFS= read -r line; do
+  [[ -z "$line" || "$line" == \#* ]] && continue
+  echo "  + $line"
+done < "$configfile"
+echo ""
+echo "Run 'dotalias' or restart your shell to apply changes."

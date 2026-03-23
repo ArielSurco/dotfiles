@@ -25,7 +25,7 @@ teardown() {
 
 # Helper: run a gp command in zsh with controlled HOME
 gp_run() {
-  env HOME="$TEST_HOME" /bin/zsh -c "source '$GP_SCRIPT' && $*"
+  env HOME="$TEST_HOME" /bin/zsh -c "export DOTFILES_DATA=\"\$HOME/.dotfiles-data\"; mkdir -p \"\$DOTFILES_DATA\"; source '$GP_SCRIPT' && $*"
 }
 
 # Helper: PATH without /opt/homebrew/bin (excludes gum)
@@ -100,6 +100,7 @@ path_no_gum() {
 
   run env HOME="$TEST_HOME" /bin/zsh -c "
     export PATH='$nogum_path'
+    export DOTFILES_DATA=\"\$HOME/.dotfiles-data\"; mkdir -p \"\$DOTFILES_DATA\"
     source '$GP_SCRIPT'
     gp_set alpha '$TEST_HOME/projects/alpha' >/dev/null 2>&1
     gp_set beta '$TEST_HOME/projects/beta' >/dev/null 2>&1
@@ -115,6 +116,7 @@ path_no_gum() {
 
   run env HOME="$TEST_HOME" /bin/zsh -c "
     export PATH='$nogum_path'
+    export DOTFILES_DATA=\"\$HOME/.dotfiles-data\"; mkdir -p \"\$DOTFILES_DATA\"
     source '$GP_SCRIPT' 2>/dev/null
     gp
   "
@@ -239,6 +241,7 @@ path_no_gum() {
 
 @test "PATH is not corrupted after _gp_watches_save" {
   run env HOME="$TEST_HOME" PATH="$ORIG_PATH" /bin/zsh -c "
+    export DOTFILES_DATA=\"\$HOME/.dotfiles-data\"; mkdir -p \"\$DOTFILES_DATA\"
     source '$GP_SCRIPT'
     _gp_watches_save
     command -v mv
@@ -249,6 +252,7 @@ path_no_gum() {
 
 @test "PATH is not corrupted after gp_sync" {
   run env HOME="$TEST_HOME" PATH="$ORIG_PATH" /bin/zsh -c "
+    export DOTFILES_DATA=\"\$HOME/.dotfiles-data\"; mkdir -p \"\$DOTFILES_DATA\"
     source '$GP_SCRIPT'
     gp_sync
     command -v mv
@@ -259,6 +263,7 @@ path_no_gum() {
 
 @test "PATH is not corrupted after _gp_load" {
   run env HOME="$TEST_HOME" PATH="$ORIG_PATH" /bin/zsh -c "
+    export DOTFILES_DATA=\"\$HOME/.dotfiles-data\"; mkdir -p \"\$DOTFILES_DATA\"
     source '$GP_SCRIPT'
     _gp_load
     command -v mv

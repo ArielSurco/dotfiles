@@ -22,7 +22,7 @@ teardown() {
 
 # Helper: run a gsync command in zsh with controlled HOME
 gsync_run() {
-  env HOME="$TEST_HOME" /bin/zsh -c "source '$GP_SCRIPT' && source '$GSYNC_SCRIPT' && $*"
+  env HOME="$TEST_HOME" /bin/zsh -c "export DOTFILES_DATA=\"\$HOME/.dotfiles-data\"; mkdir -p \"\$DOTFILES_DATA\"; source '$GP_SCRIPT' && source '$GSYNC_SCRIPT' && $*"
 }
 
 # Helper: PATH without /opt/homebrew/bin (excludes gum)
@@ -112,6 +112,7 @@ create_repo_with_origin() {
 
   run env HOME="$TEST_HOME" /bin/zsh -c "
     export PATH='$nogum_path'
+    export DOTFILES_DATA=\"\$HOME/.dotfiles-data\"; mkdir -p \"\$DOTFILES_DATA\"
     source '$GP_SCRIPT'
     source '$GSYNC_SCRIPT'
     gsync_rm
@@ -171,6 +172,7 @@ create_repo_with_origin() {
 
   # Now clone1 is behind origin — gsync should fast-forward
   run env HOME="$TEST_HOME" /bin/zsh -c "
+    export DOTFILES_DATA=\"\$HOME/.dotfiles-data\"; mkdir -p \"\$DOTFILES_DATA\"
     source '$GP_SCRIPT'
     source '$GSYNC_SCRIPT'
     gp_set myrepo '$clone1' >/dev/null 2>&1
@@ -196,6 +198,7 @@ create_repo_with_origin() {
 
   run env HOME="$TEST_HOME" /bin/zsh -c "
     export PATH='$nogum_path'
+    export DOTFILES_DATA=\"\$HOME/.dotfiles-data\"; mkdir -p \"\$DOTFILES_DATA\"
     source '$GP_SCRIPT'
     source '$GSYNC_SCRIPT'
     gp_set dirtyrepo '$clone1' >/dev/null 2>&1
@@ -211,6 +214,7 @@ create_repo_with_origin() {
 
 @test "PATH is not corrupted after _gsync_branches_load" {
   run env HOME="$TEST_HOME" PATH="$ORIG_PATH" /bin/zsh -c "
+    export DOTFILES_DATA=\"\$HOME/.dotfiles-data\"; mkdir -p \"\$DOTFILES_DATA\"
     source '$GP_SCRIPT'
     source '$GSYNC_SCRIPT'
     _gsync_branches_load
@@ -222,6 +226,7 @@ create_repo_with_origin() {
 
 @test "PATH is not corrupted after _gsync_branches_save" {
   run env HOME="$TEST_HOME" PATH="$ORIG_PATH" /bin/zsh -c "
+    export DOTFILES_DATA=\"\$HOME/.dotfiles-data\"; mkdir -p \"\$DOTFILES_DATA\"
     source '$GP_SCRIPT'
     source '$GSYNC_SCRIPT'
     _gsync_branches_save
