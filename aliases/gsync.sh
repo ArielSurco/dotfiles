@@ -1,12 +1,12 @@
 # gsync — Git sync utility for registered projects
 # Syncs configured branches across project repositories
-# Config: ~/.gsync-branches (one branch per line)
+# Config: ~/.dotfiles-data/gsync-branches (one branch per line)
 
 typeset -ga GSYNC_BRANCHES
 
 _gsync_branches_load() {
   GSYNC_BRANCHES=()
-  local configfile="$HOME/.gsync-branches"
+  local configfile="$DOTFILES_DATA/gsync-branches"
   if [[ ! -f "$configfile" ]]; then
     GSYNC_BRANCHES=(main master)
     return 0
@@ -29,7 +29,7 @@ _gsync_branches_save() {
     seen[$entry]=1
     echo "$entry" >> "$tmpfile"
   done
-  command mv "$tmpfile" "$HOME/.gsync-branches" || { echo "gsync: failed to save config" >&2; return 1; }
+  command mv "$tmpfile" "$DOTFILES_DATA/gsync-branches" || { echo "gsync: failed to save config" >&2; return 1; }
 }
 
 gsync_set() {

@@ -68,7 +68,7 @@ create_repo_with_origin() {
   [[ "$output" == *"develop"* ]]
 
   # Verify config file contains develop
-  [[ "$(< "$TEST_HOME/.gsync-branches")" == *"develop"* ]]
+  [[ "$(< "$TEST_HOME/.dotfiles-data/gsync-branches")" == *"develop"* ]]
 }
 
 @test "gsync_set deduplicates" {
@@ -76,7 +76,7 @@ create_repo_with_origin() {
   [ "$status" -eq 0 ]
 
   local count
-  count=$(rg -c '^main$' "$TEST_HOME/.gsync-branches" 2>/dev/null || echo "0")
+  count=$(rg -c '^main$' "$TEST_HOME/.dotfiles-data/gsync-branches" 2>/dev/null || echo "0")
   [ "$count" -le 1 ]
 }
 
@@ -95,8 +95,8 @@ create_repo_with_origin() {
   [ "$status" -eq 0 ]
   [[ "$output" == *"removed 'develop'"* ]]
 
-  if [ -f "$TEST_HOME/.gsync-branches" ]; then
-    [[ "$(< "$TEST_HOME/.gsync-branches")" != *"develop"* ]]
+  if [ -f "$TEST_HOME/.dotfiles-data/gsync-branches" ]; then
+    [[ "$(< "$TEST_HOME/.dotfiles-data/gsync-branches")" != *"develop"* ]]
   fi
 }
 

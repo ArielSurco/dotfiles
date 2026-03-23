@@ -18,6 +18,7 @@ The barrel file auto-sources every alias script in the directory. Adjust the pat
 |-------|-------------|------|
 | `gp` | Project navigation — register, watch, and jump between project directories | [docs/gp.md](docs/gp.md) |
 | `gsync` | Git branch sync — update configured branches across projects | [docs/gsync.md](docs/gsync.md) |
+| `dotalias` | Reload all aliases | — |
 
 ## Dependencies
 
@@ -27,8 +28,7 @@ The barrel file auto-sources every alias script in the directory. Adjust the pat
 ## Running Tests
 
 ```
-bats tests/gp.bats
-bats tests/gsync.bats
+bats tests/
 ```
 
 Requires [bats-core](https://github.com/bats-core/bats-core): `brew install bats-core`

@@ -1,13 +1,16 @@
 # gp — Dynamic Project Navigation
 # Register projects with gp_set, navigate with gp, tab-complete project names.
-# Registry: ~/.gp-projects (key=path, one per line)
+# Registry: ~/.dotfiles-data/gp-projects (key=path, one per line)
+
+export DOTFILES_DATA="$HOME/.dotfiles-data"
+[[ -d "$DOTFILES_DATA" ]] || mkdir -p "$DOTFILES_DATA"
 
 typeset -gA GP_PROJECTS
 typeset -ga GP_WATCHES
 
 _gp_load() {
   GP_PROJECTS=()
-  local registry="$HOME/.gp-projects"
+  local registry="$DOTFILES_DATA/gp-projects"
   [[ -f "$registry" ]] || return 0
 
   local line key val
@@ -30,12 +33,12 @@ _gp_save() {
     echo "${key}=${GP_PROJECTS[$key]}" >> "$tmpfile"
   done
 
-  mv "$tmpfile" "$HOME/.gp-projects" || { echo "gp: failed to save registry" >&2; return 1; }
+  mv "$tmpfile" "$DOTFILES_DATA/gp-projects" || { echo "gp: failed to save registry" >&2; return 1; }
 }
 
 _gp_watches_load() {
   GP_WATCHES=()
-  local watchfile="$HOME/.gp-watches"
+  local watchfile="$DOTFILES_DATA/gp-watches"
   [[ -f "$watchfile" ]] || return 0
 
   local line
@@ -58,7 +61,7 @@ _gp_watches_save() {
     echo "$entry" >> "$tmpfile"
   done
 
-  command mv "$tmpfile" "$HOME/.gp-watches" || { echo "gp: failed to save watches" >&2; return 1; }
+  command mv "$tmpfile" "$DOTFILES_DATA/gp-watches" || { echo "gp: failed to save watches" >&2; return 1; }
 }
 
 _gp_scan_dir() {

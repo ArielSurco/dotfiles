@@ -46,7 +46,7 @@ Without gum, a plain list of projects is printed instead.
 
 | File | Purpose |
 |------|---------|
-| `~/.gp-projects` | Project registry (`name=path`, one per line) |
-| `~/.gp-watches` | Watched directories (one path per line) |
+| `~/.dotfiles-data/gp-projects` | Project registry (`name=path`, one per line) |
+| `~/.dotfiles-data/gp-watches` | Watched directories (one path per line) |
 
 These are user data files created on first use, not part of the repo.

@@ -45,7 +45,7 @@ path_no_gum() {
   [[ "$output" == *"registered 'foo'"* ]]
 
   # Verify registry file
-  [[ "$(< "$TEST_HOME/.gp-projects")" == *"foo=$TEST_HOME/single-project"* ]]
+  [[ "$(< "$TEST_HOME/.dotfiles-data/gp-projects")" == *"foo=$TEST_HOME/single-project"* ]]
 }
 
 @test "gp_set registers project with current directory" {
@@ -53,7 +53,7 @@ path_no_gum() {
   [ "$status" -eq 0 ]
   [[ "$output" == *"registered 'myproj'"* ]]
 
-  [[ "$(< "$TEST_HOME/.gp-projects")" == *"myproj=$TEST_HOME/single-project"* ]]
+  [[ "$(< "$TEST_HOME/.dotfiles-data/gp-projects")" == *"myproj=$TEST_HOME/single-project"* ]]
 }
 
 @test "gp_set without args shows error" {
@@ -134,7 +134,7 @@ path_no_gum() {
 
   # Verify all children registered
   local contents
-  contents="$(< "$TEST_HOME/.gp-projects")"
+  contents="$(< "$TEST_HOME/.dotfiles-data/gp-projects")"
   [[ "$contents" == *"alpha="* ]]
   [[ "$contents" == *"beta="* ]]
   [[ "$contents" == *"gamma="* ]]
@@ -151,7 +151,7 @@ path_no_gum() {
   [ "$status" -eq 0 ]
 
   local contents
-  contents="$(< "$TEST_HOME/.gp-watches")"
+  contents="$(< "$TEST_HOME/.dotfiles-data/gp-watches")"
   [[ "$contents" == *"$TEST_HOME/projects"* ]]
 }
 
@@ -168,7 +168,7 @@ path_no_gum() {
 
   # Count lines in watches file — should be exactly 1
   local line_count
-  line_count=$(wc -l < "$TEST_HOME/.gp-watches" | tr -d ' ')
+  line_count=$(wc -l < "$TEST_HOME/.dotfiles-data/gp-watches" | tr -d ' ')
   [ "$line_count" -eq 1 ]
 }
 
@@ -185,7 +185,7 @@ path_no_gum() {
   [[ "$output" == *"synced"* ]]
 
   local contents
-  contents="$(< "$TEST_HOME/.gp-projects")"
+  contents="$(< "$TEST_HOME/.dotfiles-data/gp-projects")"
   [[ "$contents" == *"delta="* ]]
 }
 
@@ -216,8 +216,8 @@ path_no_gum() {
   [[ "$output" == *"removed 'killme'"* ]]
 
   # Verify gone from registry
-  if [ -f "$TEST_HOME/.gp-projects" ]; then
-    [[ "$(< "$TEST_HOME/.gp-projects")" != *"killme"* ]]
+  if [ -f "$TEST_HOME/.dotfiles-data/gp-projects" ]; then
+    [[ "$(< "$TEST_HOME/.dotfiles-data/gp-projects")" != *"killme"* ]]
   fi
 }
 

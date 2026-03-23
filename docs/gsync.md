@@ -35,7 +35,7 @@ gsync_rm staging
 When you run `gsync`, the following happens:
 
 1. **Resolve project** — finds the directory via `gp` project registry, or uses the current directory if it's a git repo
-2. **Load branch config** — reads `~/.gsync-branches` (defaults to `main` and `master` if no config)
+2. **Load branch config** — reads `~/.dotfiles-data/gsync-branches` (defaults to `main` and `master` if no config)
 3. **Fetch** — runs `git fetch --all --prune`
 4. **Dirty tree check** — if there are uncommitted changes, prompts to stash (requires gum) or skips
 5. **Per-branch sync**:
@@ -75,6 +75,6 @@ Branch names are deduplicated — adding the same branch twice has no effect.
 
 | File | Purpose |
 |------|---------|
-| `~/.gsync-branches` | Branch list to sync (one per line) |
+| `~/.dotfiles-data/gsync-branches` | Branch list to sync (one per line) |
 
 This is a user data file created on first use, not part of the repo. If the file doesn't exist or is empty, gsync defaults to syncing `main` and `master`.
