@@ -20,6 +20,7 @@ The barrel file auto-sources every alias script in the directory. Adjust the pat
 | `gsync` | Git branch sync — update configured branches across projects | [docs/gsync.md](docs/gsync.md) |
 | `pf` | Kubernetes port forwarding — forward HAProxy service ports | [docs/pf.md](docs/pf.md) |
 | `pod` | Kubernetes pod connector — interactive context, namespace, and pod selection | [docs/pod.md](docs/pod.md) |
+| `sentry` | Sentry issue search — query events by custom tags across projects | [docs/sentry.md](docs/sentry.md) |
 | `dbs` | Start local Docker database containers | — |
 | `dotalias` | Reload all aliases | — |
 
@@ -28,6 +29,7 @@ The barrel file auto-sources every alias script in the directory. Adjust the pat
 - **zsh** — Required (aliases use zsh-specific features)
 - **[gum](https://github.com/charmbracelet/gum)** — Optional, for interactive menus. Install: `brew install gum`
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** — Required for `pod` alias. Install: `brew install kubectl`
+- **[jq](https://jqlang.github.io/jq/)** — Required for `sentry` alias. Install: `brew install jq`
 
 ## Running Tests
 
