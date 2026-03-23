@@ -18,6 +18,7 @@ The barrel file auto-sources every alias script in the directory. Adjust the pat
 |-------|-------------|------|
 | `gp` | Project navigation — register, watch, and jump between project directories | [docs/gp.md](docs/gp.md) |
 | `gsync` | Git branch sync — update configured branches across projects | [docs/gsync.md](docs/gsync.md) |
+| `pf` | Kubernetes port forwarding — forward HAProxy service ports | [docs/pf.md](docs/pf.md) |
 | `pod` | Kubernetes pod connector — interactive context, namespace, and pod selection | [docs/pod.md](docs/pod.md) |
 | `dotalias` | Reload all aliases | — |
 
