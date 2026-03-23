@@ -1,0 +1,32 @@
+# Dotfiles
+
+Personal dotfiles — shell aliases and utilities.
+
+## Setup
+
+Add this line to your `.zshrc`:
+
+```zsh
+source ~/dotfiles/aliases/init.sh
+```
+
+The barrel file auto-sources every alias script in the directory. Adjust the path if you cloned the repo elsewhere.
+
+## Aliases
+
+| Alias | Description | Docs |
+|-------|-------------|------|
+| `gp` | Project navigation — register, watch, and jump between project directories | [docs/gp.md](docs/gp.md) |
+
+## Dependencies
+
+- **zsh** — Required (aliases use zsh-specific features)
+- **[gum](https://github.com/charmbracelet/gum)** — Optional, for interactive menus. Install: `brew install gum`
+
+## Running Tests
+
+```
+bats tests/gp.bats
+```
+
+Requires [bats-core](https://github.com/bats-core/bats-core): `brew install bats-core`
