@@ -41,6 +41,22 @@ Optionally run the setup wizard to choose which alias groups to enable:
 ~/dotfiles/bin/dotfiles-setup
 ```
 
+## Updating
+
+### Homebrew
+
+```zsh
+brew upgrade dotfiles
+```
+
+### Manual
+
+```zsh
+cd ~/dotfiles && git pull
+```
+
+Your configuration and data (`~/.dotfiles-data/`) is preserved across updates.
+
 ## Setup
 
 On first load with no configuration, **all alias groups are enabled** (backwards compatible). Run `dotfiles-setup` to selectively enable/disable groups. The configuration is stored in `~/.dotfiles-data/enabled-groups`.
