@@ -67,6 +67,7 @@ Core utilities (`utils.sh`) are always loaded regardless of configuration.
 
 | Alias | Group | Description | Docs |
 |-------|-------|-------------|------|
+| `dev` | dev | Configurable project dev launcher — templates, TUI selection, per-project configs | [docs/dev.md](docs/dev.md) |
 | `gp` | navigation | Project navigation — register, watch, and jump between project directories | [docs/gp.md](docs/gp.md) |
 | `gsync` | git | Git branch sync — update configured branches across projects | [docs/gsync.md](docs/gsync.md) |
 | `pf` | kubernetes | Kubernetes port forwarding — forward HAProxy service ports | [docs/pf.md](docs/pf.md) |

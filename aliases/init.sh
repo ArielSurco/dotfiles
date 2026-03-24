@@ -16,6 +16,7 @@ _DOTFILES_GROUPS=(
   kubernetes  "pod.sh,pf.sh|Kubernetes pod connection and port forwarding"
   docker      "dbs.sh|Start local Docker database containers"
   sentry      "sentry.sh|Sentry issue search by custom tags"
+  dev         "dev.sh|Configurable project dev launcher"
 )
 
 # Core files always loaded (not selectable)
