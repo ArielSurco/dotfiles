@@ -505,16 +505,18 @@ dev() {
       return 1
     fi
 
-    local items=()
+    local configured=() unconfigured=()
     local key indicator
     for key in ${(ko)GP_PROJECTS}; do
       indicator=$(_dev_project_indicator "$key")
       if [[ -n "$indicator" ]]; then
-        items+=("$key $indicator")
+        configured+=("$key $indicator")
       else
-        items+=("$key")
+        unconfigured+=("$key")
       fi
     done
+
+    local items=("${configured[@]}" "${unconfigured[@]}")
 
     local selection
     selection=$(printf '%s\n' "${items[@]}" | gum choose --header "Select project to dev:")
