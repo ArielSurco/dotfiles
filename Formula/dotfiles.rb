@@ -1,8 +1,8 @@
 class Dotfiles < Formula
   desc "Shell aliases and utilities for development workflows"
   homepage "https://github.com/ArielSurco/dotfiles"
-  url "https://github.com/ArielSurco/dotfiles/archive/refs/tags/v1.0.0.tar.gz"
-  sha256 "f5ac4f453d27e89f09dcd00ebb026415fe8ba90127103621c8ea1446d8abaf0b"  # Updated on release
+  url "https://github.com/ArielSurco/dotfiles/archive/refs/tags/v1.0.1.tar.gz"
+  sha256 "e75c76767669f6440c458d37198f131401b2d39aec9240e0eef9e052ab2cf37d"
   license "MIT"
 
   depends_on "gum"
