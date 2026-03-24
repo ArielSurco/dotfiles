@@ -49,7 +49,14 @@ pf() {
     [[ -z "$kube_ctx" ]] && return 0
   fi
 
-  # Step 2: Get ports
+  # Step 2: Handle special contexts
+  if [[ "$kube_ctx" == *operations* ]]; then
+    echo "Forwarding $kube_ctx → gem-server:9200→80"
+    kubectl --context="$kube_ctx" -n gem-server port-forward svc/gem-server 9200:80
+    return $?
+  fi
+
+  # Step 3: Get ports
   echo "Fetching ports from haproxy ($kube_ctx)..."
   local port_data
   port_data=$(_pf_get_ports "$kube_ctx")
@@ -62,7 +69,7 @@ pf() {
   [[ -d "$DOTFILES_DATA" ]] || mkdir -p "$DOTFILES_DATA"
   echo "$port_data" > "$DOTFILES_DATA/pf-ports-${kube_ctx}"
 
-  # Step 3: Resolve port
+  # Step 4: Resolve port
   local pname pnum
   if [[ -n "$port_arg" ]]; then
     # Lookup port by name from fetched data
@@ -93,7 +100,7 @@ pf() {
     pnum="${pnum%)}"
   fi
 
-  # Step 4: Connect
+  # Step 5: Connect
   echo "Forwarding $kube_ctx → haproxy:$pname on port $pnum"
   kubectl --context="$kube_ctx" port-forward -n haproxy svc/haproxy "${pnum}:${pnum}"
 }
