@@ -1,109 +1,241 @@
 #!/usr/bin/env zsh
-# dotfiles-setup — Interactive alias group configuration
+# dotfiles-setup — Interactive dotfiles configuration with domain selection
 
 # Resolve paths
 _SETUP_SCRIPT_DIR="${0:A:h}"
 _SETUP_ALIASES_DIR="$_SETUP_SCRIPT_DIR/../aliases"
 
-# Source init.sh to get DOTFILES_DATA and group registry
-# But we need DOTFILES_DATA without loading all aliases
+# Data directory
 export DOTFILES_DATA="$HOME/.dotfiles-data"
 [[ -d "$DOTFILES_DATA" ]] || mkdir -p "$DOTFILES_DATA"
 
-# Source init.sh just to get the registry (it will also load aliases but that's ok)
-source "$_SETUP_ALIASES_DIR/init.sh"
+# --- Flag parsing ---
+_FLAG_ALIASES=""
+_FLAG_AI=""
+_FLAG_ALL=""
 
-configfile="$DOTFILES_DATA/enabled-groups"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --aliases) _FLAG_ALIASES=1; shift ;;
+    --ai)      _FLAG_AI=1; shift ;;
+    --all)     _FLAG_ALL=1; shift ;;
+    *)         echo "Unknown flag: $1"; exit 1 ;;
+  esac
+done
 
-# Read current selection if exists
-typeset -A current_enabled
-if [[ -f "$configfile" ]]; then
-  local line
-  while IFS= read -r line || [[ -n "$line" ]]; do
-    [[ -z "$line" || "$line" == \#* ]] && continue
-    current_enabled[$line]=1
-  done < "$configfile"
-fi
+# --- Domain definitions ---
+typeset -A _DOMAIN_DESCRIPTIONS
+_DOMAIN_DESCRIPTIONS[aliases]="Shell aliases & utilities"
+_DOMAIN_DESCRIPTIONS[ai]="AI tools (Claude, Cursor)"
+# Ordered list for display
+_DOMAIN_ORDER=(aliases ai)
 
-echo "Dotfiles Setup"
-echo "=============="
-echo ""
-echo "Select which alias groups to enable:"
-echo "(core aliases are always enabled)"
-echo ""
+# --- Domain selection ---
+_domains_file="$DOTFILES_DATA/enabled-domains"
 
-if command -v gum &>/dev/null; then
-  # Build items for gum choose --no-limit
-  local items=()
-  local preselected=()
-  local gname gval desc
-  for gname in ${(ko)_DOTFILES_GROUPS}; do
-    gval="${_DOTFILES_GROUPS[$gname]}"
-    desc="${gval##*|}"
-    items+=("$gname — $desc")
-    # Pre-select if currently enabled or if no config exists (all enabled by default)
-    if [[ ! -f "$configfile" ]] || [[ -n "${current_enabled[$gname]}" ]]; then
-      preselected+=("$gname — $desc")
-    fi
-  done
+_selected_domains=()
 
-  local selected
-  if [[ ${#preselected} -gt 0 ]]; then
-    selected=$(printf '%s\n' "${items[@]}" | gum choose --no-limit --header "Select groups (space to toggle, enter to confirm):" --selected="$(printf '%s,' "${preselected[@]}")")
-  else
-    selected=$(printf '%s\n' "${items[@]}" | gum choose --no-limit --header "Select groups (space to toggle, enter to confirm):")
-  fi
-
-  if [[ -z "$selected" ]]; then
-    echo "No groups selected. Keeping current config."
-    exit 0
-  fi
-
-  # Parse selected — extract group names (before " — ")
-  echo "# Enabled alias groups" > "$configfile"
-  echo "$selected" | while IFS= read -r line; do
-    local gname="${line%% — *}"
-    echo "$gname" >> "$configfile"
-  done
-
+if [[ -n "$_FLAG_ALL" ]]; then
+  _selected_domains=("${_DOMAIN_ORDER[@]}")
+elif [[ -n "$_FLAG_ALIASES" || -n "$_FLAG_AI" ]]; then
+  [[ -n "$_FLAG_ALIASES" ]] && _selected_domains+=(aliases)
+  [[ -n "$_FLAG_AI" ]]      && _selected_domains+=(ai)
 else
-  # Fallback: numbered list with manual input
-  echo "gum not found — using text mode"
+  # Interactive domain selection
+  echo "Dotfiles Setup"
+  echo "=============="
   echo ""
-  local gnames=()
-  local idx=1
-  local gname gval desc
-  for gname in ${(ko)_DOTFILES_GROUPS}; do
-    gval="${_DOTFILES_GROUPS[$gname]}"
-    desc="${gval##*|}"
-    local marker=" "
-    if [[ ! -f "$configfile" ]] || [[ -n "${current_enabled[$gname]}" ]]; then
-      marker="*"
-    fi
-    echo "  [$marker] $idx. $gname — $desc"
-    gnames+=("$gname")
-    (( idx++ ))
-  done
+  echo "Select which domains to configure:"
   echo ""
-  echo "Enter group numbers to enable (comma-separated, e.g. 1,2,3):"
-  echo -n "> "
-  read -r selection
 
-  echo "# Enabled alias groups" > "$configfile"
-  local num
-  for num in ${(s:,:)selection}; do
-    num="${num## }" ; num="${num%% }"
-    if [[ "$num" -ge 1 && "$num" -le ${#gnames} ]]; then
-      echo "${gnames[$num]}" >> "$configfile"
+  # Read current selection if exists
+  typeset -A _current_domains
+  if [[ -f "$_domains_file" ]]; then
+    local line
+    while IFS= read -r line || [[ -n "$line" ]]; do
+      [[ -z "$line" || "$line" == \#* ]] && continue
+      _current_domains[$line]=1
+    done < "$_domains_file"
+  fi
+
+  if command -v gum &>/dev/null; then
+    local items=()
+    local preselected=()
+    local dname
+    for dname in "${_DOMAIN_ORDER[@]}"; do
+      local label="$dname — ${_DOMAIN_DESCRIPTIONS[$dname]}"
+      items+=("$label")
+      # Pre-select if currently enabled or if no config exists (all enabled by default)
+      if [[ ! -f "$_domains_file" ]] || [[ -n "${_current_domains[$dname]}" ]]; then
+        preselected+=("$label")
+      fi
+    done
+
+    local selected
+    if [[ ${#preselected} -gt 0 ]]; then
+      selected=$(printf '%s\n' "${items[@]}" | gum choose --no-limit --header "Select domains (space to toggle, enter to confirm):" --selected="$(printf '%s,' "${preselected[@]}")")
+    else
+      selected=$(printf '%s\n' "${items[@]}" | gum choose --no-limit --header "Select domains (space to toggle, enter to confirm):")
     fi
-  done
+
+    if [[ -z "$selected" ]]; then
+      echo "No domains selected. Keeping current config."
+      exit 0
+    fi
+
+    # Parse selected — extract domain names (before " — ")
+    echo "# Enabled domains" > "$_domains_file"
+    echo "$selected" | while IFS= read -r line; do
+      local dname="${line%% — *}"
+      echo "$dname" >> "$_domains_file"
+      _selected_domains+=("$dname")
+    done
+
+  else
+    # Fallback: numbered list with manual input
+    echo "gum not found — using text mode"
+    echo ""
+    local dnames=()
+    local idx=1
+    local dname
+    for dname in "${_DOMAIN_ORDER[@]}"; do
+      local marker=" "
+      if [[ ! -f "$_domains_file" ]] || [[ -n "${_current_domains[$dname]}" ]]; then
+        marker="*"
+      fi
+      echo "  [$marker] $idx. $dname — ${_DOMAIN_DESCRIPTIONS[$dname]}"
+      dnames+=("$dname")
+      (( idx++ ))
+    done
+    echo ""
+    echo "Enter domain numbers to enable (comma-separated, e.g. 1,2):"
+    echo -n "> "
+    read -r selection
+
+    echo "# Enabled domains" > "$_domains_file"
+    local num
+    for num in ${(s:,:)selection}; do
+      num="${num## }" ; num="${num%% }"
+      if [[ "$num" -ge 1 && "$num" -le ${#dnames} ]]; then
+        echo "${dnames[$num]}" >> "$_domains_file"
+        _selected_domains+=("${dnames[$num]}")
+      fi
+    done
+  fi
+
+  # If no config existed and no selection was made interactively, enable all
+  if [[ ${#_selected_domains} -eq 0 ]]; then
+    _selected_domains=("${_DOMAIN_ORDER[@]}")
+  fi
 fi
 
-echo ""
-echo "Enabled groups:"
-while IFS= read -r line; do
-  [[ -z "$line" || "$line" == \#* ]] && continue
-  echo "  + $line"
-done < "$configfile"
-echo ""
-echo "Run 'dotalias' or restart your shell to apply changes."
+# --- Per-domain setup ---
+for _domain in "${_selected_domains[@]}"; do
+  case "$_domain" in
+    aliases)
+      # Source init.sh to get DOTFILES_DATA and group registry
+      source "$_SETUP_ALIASES_DIR/init.sh"
+
+      _aliases_configfile="$DOTFILES_DATA/enabled-groups"
+
+      # Read current selection if exists
+      typeset -A _alias_current_enabled
+      if [[ -f "$_aliases_configfile" ]]; then
+        local line
+        while IFS= read -r line || [[ -n "$line" ]]; do
+          [[ -z "$line" || "$line" == \#* ]] && continue
+          _alias_current_enabled[$line]=1
+        done < "$_aliases_configfile"
+      fi
+
+      echo ""
+      echo "Aliases Setup"
+      echo "-------------"
+      echo ""
+      echo "Select which alias groups to enable:"
+      echo "(core aliases are always enabled)"
+      echo ""
+
+      if command -v gum &>/dev/null; then
+        # Build items for gum choose --no-limit
+        local items=()
+        local preselected=()
+        local gname gval desc
+        for gname in ${(ko)_DOTFILES_GROUPS}; do
+          gval="${_DOTFILES_GROUPS[$gname]}"
+          desc="${gval##*|}"
+          items+=("$gname — $desc")
+          # Pre-select if currently enabled or if no config exists (all enabled by default)
+          if [[ ! -f "$_aliases_configfile" ]] || [[ -n "${_alias_current_enabled[$gname]}" ]]; then
+            preselected+=("$gname — $desc")
+          fi
+        done
+
+        local selected
+        if [[ ${#preselected} -gt 0 ]]; then
+          selected=$(printf '%s\n' "${items[@]}" | gum choose --no-limit --header "Select groups (space to toggle, enter to confirm):" --selected="$(printf '%s,' "${preselected[@]}")")
+        else
+          selected=$(printf '%s\n' "${items[@]}" | gum choose --no-limit --header "Select groups (space to toggle, enter to confirm):")
+        fi
+
+        if [[ -z "$selected" ]]; then
+          echo "No groups selected. Keeping current config."
+          continue
+        fi
+
+        # Parse selected — extract group names (before " — ")
+        echo "# Enabled alias groups" > "$_aliases_configfile"
+        echo "$selected" | while IFS= read -r line; do
+          local gname="${line%% — *}"
+          echo "$gname" >> "$_aliases_configfile"
+        done
+
+      else
+        # Fallback: numbered list with manual input
+        echo "gum not found — using text mode"
+        echo ""
+        local gnames=()
+        local idx=1
+        local gname gval desc
+        for gname in ${(ko)_DOTFILES_GROUPS}; do
+          gval="${_DOTFILES_GROUPS[$gname]}"
+          desc="${gval##*|}"
+          local marker=" "
+          if [[ ! -f "$_aliases_configfile" ]] || [[ -n "${_alias_current_enabled[$gname]}" ]]; then
+            marker="*"
+          fi
+          echo "  [$marker] $idx. $gname — $desc"
+          gnames+=("$gname")
+          (( idx++ ))
+        done
+        echo ""
+        echo "Enter group numbers to enable (comma-separated, e.g. 1,2,3):"
+        echo -n "> "
+        read -r selection
+
+        echo "# Enabled alias groups" > "$_aliases_configfile"
+        local num
+        for num in ${(s:,:)selection}; do
+          num="${num## }" ; num="${num%% }"
+          if [[ "$num" -ge 1 && "$num" -le ${#gnames} ]]; then
+            echo "${gnames[$num]}" >> "$_aliases_configfile"
+          fi
+        done
+      fi
+
+      echo ""
+      echo "Enabled groups:"
+      while IFS= read -r line; do
+        [[ -z "$line" || "$line" == \#* ]] && continue
+        echo "  + $line"
+      done < "$_aliases_configfile"
+      echo ""
+      echo "Run 'dotalias' or restart your shell to apply changes."
+      ;;
+
+    ai)
+      source "$_SETUP_SCRIPT_DIR/../ai/setup.sh"
+      _ai_setup
+      ;;
+  esac
+done
