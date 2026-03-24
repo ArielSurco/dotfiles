@@ -9,7 +9,6 @@ class Dotfiles < Formula
 
   def install
     prefix.install Dir["aliases"]
-    prefix.install Dir["docs"]
     bin.install "bin/dotfiles-setup"
   end
 
